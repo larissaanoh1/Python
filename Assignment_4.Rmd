@@ -1,0 +1,163 @@
+
+```{r}
+install.packages("mplot")
+install.packages("glmnet")
+install.packages("MASS")
+install.packages("dplyr")
+install.packages("ISLR")
+```
+
+
+```{r}
+install.packages("Metrics")
+install.packages("ggplot2")
+```
+
+
+
+```{r}
+library(mplot)
+library(glmnet)
+library(MASS)
+library(dplyr)
+library(ISLR)
+library(Metrics)
+library(ggplot2)
+```
+
+
+```{r}
+data("College")
+College
+```
+
+
+
+```{r}
+df = mutate(College, Private=ifelse(Private=="Yes", 1, 0))
+df
+```
+
+
+```{r} 
+set.seed(123)
+
+#use 70% of dataset as training set and 30% as test set
+splits <- sample(x= nrow(df), size = nrow(df)*0.7)
+train  <- df[splits, ]
+test   <- df[-splits, ]
+```
+
+
+```{r}
+train_x <- model.matrix(Grad.Rate~., train)[,-1]
+test_x <- model.matrix(Grad.Rate~., test)[,-1]
+```
+
+
+
+```{r}
+train_x
+```
+
+```{r}
+test_x
+```
+
+
+
+```{r}
+train_y <- train$Grad.Rate
+test_y <- test$Grad.Rate
+```
+
+
+
+
+```{r}
+ridge_reg = glmnet(train_x, train_y, type.mesure = "mse", alpha = 0, family = 'gaussian')
+ridge_reg
+```
+
+
+
+```{r}
+lambdas <- 10^seq(2, -3, by = -.1)
+cv_ridge <- cv.glmnet(x=train_x, y=train_y, alpha = 0, lambda = lambdas)
+lambda_min <- cv_ridge$lambda.min
+lambda_min
+```
+
+
+```{r}
+cv_ridge
+```
+
+
+
+```{r}
+lambda_1se <- cv_ridge$lambda.1se
+lambda_1se
+```
+
+#Plot the results from the cv.glmnet
+
+```{r}
+plot(cv_ridge)
+```
+#Fit a Ridge regression model
+#define matrix of predictor variables
+
+```{r}
+x <- data.matrix(train[, c("Accept", "Outstate", "F.Undergrad", "Apps", "S.F.Ratio", "Private", "Enroll", "Top10perc", "Top25perc", "P.Undergrad", "Room.Board", "Books", "Personal", "PhD", "Terminal")])
+y <- train$Grad.Rate
+ridge_mod_cnt <- cv.glmnet(x, y, alpha = 0)
+ridge_mod_cnt
+``` 
+
+#Determine the performance of the fit model 
+
+```{r}
+actual <- 
+RMSE=sqrt(mean((actual - predicted)^2))
+```
+
+
+
+#Determine the performance of the fit model against the test set
+
+```{r}
+
+```
+
+
+#LASSO
+
+Use the cv.glmnet function to estimate the lambda.min and lambda.1se values
+```{r}
+set.seed(123)
+cv.lasso = glmnet(train_x, train_y,  type.mesure = "mse", alpha = 1, family = 'gaussian')
+cv.lasso
+```
+
+
+
+
+
+#Plot the results from the cv.glmnet
+
+```{r}
+plot(cv.lasso)
+```
+
+
+
+```{r}
+lambdas <- 10^seq(2, -3, by = -.1)
+cv.lasso1 <- cv.glmnet(x=train_x, y=train_y, alpha = 1, lambda = lambdas)
+lambda_min <- cv.lasso1$lambda.min
+lambda_min
+```
+
+
+
